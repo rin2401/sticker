@@ -35,6 +35,13 @@ async def sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_sticker(s["id"])
     else:
         for k in M:
+            if q in k.split():
+                ss = M[k]["stickers"]
+                s = random.choice(ss)
+                await update.message.reply_sticker(s["id"])
+                return
+
+        for k in M:
             if q in k:
                 ss = M[k]["stickers"]
                 s = random.choice(ss)
@@ -53,7 +60,6 @@ if __name__ == "__main__":
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, sticker))
-
     print("🤖 Bot đang chạy...")
     app.bot.delete_webhook()
     app.run_polling()
