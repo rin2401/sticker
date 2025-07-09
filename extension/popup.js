@@ -121,10 +121,18 @@ function createStickerElement(sticker) {
                 const response = await fetch(url);
                 const blob = await response.blob();
                 if (window.ClipboardItem) {
-                    console.log("ClipboardItem")
+                    console.log("ClipboardItem PNG")
                     const item = new ClipboardItem({ [blob.type]: blob });
                     await navigator.clipboard.write([item]);
                     copied = true;
+                }
+            } else {
+                const response = await fetch(sticker.url);
+                const blob = await response.blob();
+                if (window.ClipboardItem) {
+                    console.log("ClipboardItem GIF")
+                    const item = new ClipboardItem({ [blob.type]: blob });
+                    await navigator.clipboard.write([item]);
                 }
             }
         } catch (e) {
