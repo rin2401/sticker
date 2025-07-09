@@ -1,7 +1,7 @@
 # Sticker
 
 ## Features
-- [x] Zalo bot sticker
+- [x] Sticker bot
 - [x] Chrome extention
   - [x] Copy sticker (PNG)
   - [x] Create GIF from spritesheet
