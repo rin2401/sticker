@@ -45,13 +45,25 @@ async function createGif(url) {
     const height = spriteSheet.height;
     console.log(width, height, spriteSheet.data)
 
-    if (width == height) {
-        return null
-    }
 
     var frameSize = 130;
     var frameWidth = frameSize;
     var frameHeight = frameSize;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = frameWidth;
+    canvas.height = frameHeight;
+    var context = canvas.getContext('2d', { willReadFrequently: true });
+
+    if (width == height) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(
+            spriteSheet,
+            0, 0, frameWidth, frameHeight,
+            0, 0, canvas.width, canvas.height
+        );
+        return canvas.toDataURL()
+    }
 
     const framesX = Math.floor(width / frameWidth);
     const framesY = Math.floor(height / frameHeight);
@@ -65,10 +77,7 @@ async function createGif(url) {
     encoder.setQuality(256)
     encoder.start();
 
-    const canvas = document.createElement('canvas');
-    canvas.width = frameWidth;
-    canvas.height = frameHeight;
-    var context = canvas.getContext('2d', { willReadFrequently: true });
+
 
     for (let y = 0; y < framesY; y++) {
         for (let x = 0; x < framesX; x++) {
@@ -106,10 +115,10 @@ function createStickerElement(sticker) {
             console.log(sticker.url)
             var url = await createGif(sticker.url);
             console.log("Gift url:", url)
-            if (url) {
-                img.src = url
-            } else {
-                const response = await fetch(sticker.url);
+            img.src = url
+
+            if (url.includes("data:image/png")) {
+                const response = await fetch(url);
                 const blob = await response.blob();
                 if (window.ClipboardItem) {
                     console.log("ClipboardItem")
