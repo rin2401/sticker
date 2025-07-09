@@ -1,16 +1,16 @@
 {
-  "manifest_version": 3,
-  "name": "Sticker",
-  "version": "1.0",
-  "description": "Sticker",
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": {
-      "128": "icon128.png"
+    "manifest_version": 3,
+    "name": "Sticker",
+    "version": "1.0",
+    "description": "Sticker",
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "128": "icon128.png"
+        }
+    },
+    "permissions": ["clipboardWrite"],
+    "icons": {
+        "128": "icon128.png"
     }
-  },
-  "permissions": ["clipboardWrite"],
-  "icons": {
-    "128": "icon128.png"
-  }
 }

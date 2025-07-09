@@ -1,5 +1,4 @@
 async function fetchStickerPacks() {
-    // Đọc sticker.json từ thư mục extension
     const response = await fetch('data/sticker.json');
     return await response.json();
 }
@@ -22,6 +21,76 @@ function createPackElement(pack, onClick) {
     return div;
 }
 
+function loadImage(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = src;
+        img.crossOrigin = "Anonymous";
+
+        img.onload = () => resolve(img);
+        img.onerror = (err) => reject(err);
+    });
+}
+
+async function createGif(url) {
+    url = url.replace(
+        "https://zalo-api.zadn.vn/api/emoticon/sticker/webpc",
+        "https://zalo-api.zadn.vn/api/emoticon/sprite",
+    )
+
+    console.log(url)
+
+    const spriteSheet = await loadImage(url);
+    const width = spriteSheet.width;
+    const height = spriteSheet.height;
+    console.log(width, height, spriteSheet.data)
+
+    if (width == height) {
+        return null
+    }
+
+    var frameSize = 130;
+    var frameWidth = frameSize;
+    var frameHeight = frameSize;
+
+    const framesX = Math.floor(width / frameWidth);
+    const framesY = Math.floor(height / frameHeight);
+
+    console.log(framesX, framesY, frameWidth, frameHeight)
+
+    var encoder = new GIFEncoder();
+    encoder.setRepeat(0);
+    encoder.setDelay(100);
+    encoder.setTransparent(0x000000);
+    encoder.setQuality(256)
+    encoder.start();
+
+    const canvas = document.createElement('canvas');
+    canvas.width = frameWidth;
+    canvas.height = frameHeight;
+    var context = canvas.getContext('2d', { willReadFrequently: true });
+
+    for (let y = 0; y < framesY; y++) {
+        for (let x = 0; x < framesX; x++) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(
+                spriteSheet,
+                x * frameWidth, y * frameHeight, frameWidth, frameHeight,
+                0, 0, canvas.width, canvas.height
+            );
+
+            console.log("Frame", x, y)
+
+            encoder.addFrame(context);
+        }
+    }
+
+    encoder.finish();
+    var buffer = encoder.stream().getData();
+    return 'data:image/gif;base64,' + encode64(buffer);
+}
+
+
 function createStickerElement(sticker) {
     const div = document.createElement('div');
     div.className = 'sticker-item';
@@ -34,14 +103,23 @@ function createStickerElement(sticker) {
     div.onclick = async () => {
         let copied = false;
         try {
-            const response = await fetch(sticker.url);
-            const blob = await response.blob();
-            if (window.ClipboardItem) {
-                const item = new ClipboardItem({ [blob.type]: blob });
-                await navigator.clipboard.write([item]);
-                copied = true;
+            console.log(sticker.url)
+            var url = await createGif(sticker.url);
+            console.log("Gift url:", url)
+            if (url) {
+                img.src = url
+            } else {
+                const response = await fetch(sticker.url);
+                const blob = await response.blob();
+                if (window.ClipboardItem) {
+                    console.log("ClipboardItem")
+                    const item = new ClipboardItem({ [blob.type]: blob });
+                    await navigator.clipboard.write([item]);
+                    copied = true;
+                }
             }
         } catch (e) {
+            console.log("Error", e)
             await navigator.clipboard.writeText(sticker.url);
         }
         if (copied) {
