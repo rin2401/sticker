@@ -63,6 +63,8 @@ if __name__ == "__main__":
 
     app.add_handler(CommandHandler("r", rand))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, sticker))
+    app.add_handler(MessageHandler(filters.STICKER & ~filters.COMMAND, rand))
+
     print("🤖 Bot đang chạy...")
     app.bot.delete_webhook()
     app.run_polling()
