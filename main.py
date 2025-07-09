@@ -51,14 +51,17 @@ async def sticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Không tìm thấy sticker.")
 
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(f"Hi {update.effective_user.display_name}")
+async def rand(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    s = random.choice(data)
+    ss = s["stickers"]
+    s = random.choice(ss)
+    await update.message.reply_sticker(s["id"])
 
 
 if __name__ == "__main__":
     app = ApplicationBuilder().token(os.getenv("TOKEN")).build()
 
-    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("r", rand))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, sticker))
     print("🤖 Bot đang chạy...")
     app.bot.delete_webhook()
