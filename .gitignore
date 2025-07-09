@@ -1,2 +1,4 @@
 data/img/
+data/sprite/
 .env
+.DS_Store

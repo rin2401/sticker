@@ -47,15 +47,33 @@ async def get_sticker_img(cid, sticker_id, url):
         f.write(response.content)
 
 
+async def get_sticker_sprite(cid, sticker_id, url):
+    url = url.replace(
+        "https://zalo-api.zadn.vn/api/emoticon/sticker/webpc",
+        "https://zalo-api.zadn.vn/api/emoticon/sprite",
+    )
+
+    OUT = f"data/sprite/{cid}/{sticker_id}.png"
+    if os.path.exists(OUT):
+        return
+
+    os.makedirs(f"data/sprite/{cid}", exist_ok=True)
+    response = await client.get(url)
+
+    with open(OUT, "wb") as f:
+        f.write(response.content)
+
+
 async def main():
     stickers = await get_sticker()
     for s in tqdm(stickers):
         tasks = [
-            get_sticker_img(s["id"], sticker["id"], sticker["url"])
+            get_sticker_sprite(s["id"], sticker["id"], sticker["url"])
             for sticker in s["stickers"]
         ]
         await asyncio.gather(*tasks)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    print("Crawl Sticker")
+    # asyncio.run(main())
