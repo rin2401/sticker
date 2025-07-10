@@ -36,10 +36,14 @@ function loadImage(src) {
 }
 
 async function createGif(url) {
-    url = url.replace(
-        "https://zalo-api.zadn.vn/api/emoticon/sticker/webpc",
-        "https://zalo-api.zadn.vn/api/emoticon/sprite",
-    )
+    if (url.includes("combot.org")) {
+        url = "https://cors.rin2401.workers.dev/" + url
+    } else {
+        url = url.replace(
+            "https://zalo-api.zadn.vn/api/emoticon/sticker/webpc",
+            "https://zalo-api.zadn.vn/api/emoticon/sprite",
+        )
+    }
 
     console.log(url)
 
@@ -117,7 +121,7 @@ function createStickerElement(sticker) {
         try {
             var blob;
             console.log(sticker.url)
-            if (!sticker.url.startsWith("http") || sticker.url.startsWith("combot")) {
+            if (!sticker.url.startsWith("http")) {
                 const response = await fetch(sticker.url);
                 blob = await response.blob();
             } else {
