@@ -1,6 +1,8 @@
 async function fetchStickerPacks() {
-    const response = await fetch('data/sticker.json');
-    return await response.json();
+    let response = await fetch('data/sticker.json');
+    response = await response.json();
+
+    return response;
 }
 
 function createPackElement(pack, onClick) {
@@ -112,28 +114,30 @@ function createStickerElement(sticker) {
     div.onclick = async () => {
         let copied = false;
         try {
+            var blob;
             console.log(sticker.url)
-            var url = await createGif(sticker.url);
-            console.log("Gift url:", url)
-            img.src = url
-
-            if (url.includes("data:image/png")) {
-                const response = await fetch(url);
-                const blob = await response.blob();
-                if (window.ClipboardItem) {
-                    console.log("ClipboardItem PNG")
-                    const item = new ClipboardItem({ [blob.type]: blob });
-                    await navigator.clipboard.write([item]);
-                    copied = true;
+            if (sticker.url.startsWith("http")) {
+                var url = await createGif(sticker.url);
+                console.log("Gift url:", url)
+                img.src = url
+                if (url.includes("data:image/png")) {
+                    const response = await fetch(url);
+                    blob = await response.blob();
+                } else {
+                    const response = await fetch(sticker.url);
+                    blob = await response.blob();
                 }
             } else {
                 const response = await fetch(sticker.url);
-                const blob = await response.blob();
-                if (window.ClipboardItem) {
-                    console.log("ClipboardItem GIF")
-                    const item = new ClipboardItem({ [blob.type]: blob });
-                    await navigator.clipboard.write([item]);
-                }
+                blob = await response.blob();
+                console.log("Blob", blob)
+            }
+
+            if (window.ClipboardItem) {
+                console.log("ClipboardItem")
+                const item = new ClipboardItem({ [blob.type]: blob });
+                await navigator.clipboard.write([item]);
+                copied = true;
             }
         } catch (e) {
             console.log("Error", e)
