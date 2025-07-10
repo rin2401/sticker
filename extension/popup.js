@@ -1,8 +1,9 @@
 async function fetchStickerPacks() {
     let response = await fetch('data/sticker.json');
     response = await response.json();
-
-    return response;
+    let tele = await fetch('data/tele.json');
+    tele = await tele.json();
+    return tele.concat(response);
 }
 
 function createPackElement(pack, onClick) {
@@ -116,7 +117,10 @@ function createStickerElement(sticker) {
         try {
             var blob;
             console.log(sticker.url)
-            if (sticker.url.startsWith("http")) {
+            if (!sticker.url.startsWith("http") || sticker.url.startsWith("combot")) {
+                const response = await fetch(sticker.url);
+                blob = await response.blob();
+            } else {
                 var url = await createGif(sticker.url);
                 console.log("Gift url:", url)
                 img.src = url
@@ -127,11 +131,9 @@ function createStickerElement(sticker) {
                     const response = await fetch(sticker.url);
                     blob = await response.blob();
                 }
-            } else {
-                const response = await fetch(sticker.url);
-                blob = await response.blob();
-                console.log("Blob", blob)
             }
+
+            console.log("Blob", blob)
 
             if (window.ClipboardItem) {
                 console.log("ClipboardItem")
