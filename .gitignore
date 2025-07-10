@@ -3,3 +3,6 @@ data/sprite/
 .env
 .DS_Store
 *.zip
+.cache/
+downloads/
+env.txt
