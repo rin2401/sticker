@@ -1,9 +1,12 @@
 async function fetchStickerPacks() {
-    let response = await fetch('data/sticker.json');
-    response = await response.json();
-    let tele = await fetch('data/tele.json');
-    tele = await tele.json();
-    return tele.concat(response);
+    const paths = ["data/line.json", "data/tele.json", "data/sticker.json"]
+    let packs = []
+    for (let path of paths) {
+        let response = await fetch(path);
+        response = await response.json();
+        packs = packs.concat(response);
+    }
+    return packs;
 }
 
 function createPackElement(pack, onClick) {

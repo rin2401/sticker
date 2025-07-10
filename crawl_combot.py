@@ -42,23 +42,24 @@ def crawl_pack(id):
     return item
 
 
-OUT = "extension/data/tele.json"
-items = []
-ids = set()
+if __name__ == "__main__":
+    OUT = "extension/data/tele.json"
+    items = []
+    ids = set()
 
-if os.path.exists(OUT):
-    with open(OUT, "r") as f:
-        items = json.load(f)
-        ids = set([x["id"] for x in items])
+    if os.path.exists(OUT):
+        with open(OUT, "r") as f:
+            items = json.load(f)
+            ids = set([x["id"] for x in items])
 
-id = "utyaduck"
-id = "Hamsters_Stickers"
-if id in ids:
-    print("Exist pack id")
-    exit()
+    id = "utyaduck"
+    id = "Hamsters_Stickers"
+    if id in ids:
+        print("Exist pack id")
+        exit()
 
-item = crawl_pack(id)
-items.append(item)
+    item = crawl_pack(id)
+    items.append(item)
 
-with open(OUT, "w") as f:
-    f.write(json.dumps(items, indent=4, ensure_ascii=False))
+    with open(OUT, "w") as f:
+        f.write(json.dumps(items, indent=4, ensure_ascii=False))
