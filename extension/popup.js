@@ -35,21 +35,27 @@ function loadImage(src) {
     });
 }
 
-async function createGif(url) {
-    if (url.includes("combot.org")) {
-        url = "https://cors.rin2401.workers.dev/" + url
-    } else {
-        url = url.replace(
-            "https://zalo-api.zadn.vn/api/emoticon/sticker/webpc",
-            "https://zalo-api.zadn.vn/api/emoticon/sprite",
-        )
-    }
+async function createGif(url, is_gif = false) {
     console.log(url)
 
     const spriteSheet = await loadImage(url);
     const width = spriteSheet.width;
     const height = spriteSheet.height;
     console.log(width, height)
+
+    if (!is_gif) {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(
+            spriteSheet,
+            0, 0, width, height,
+            0, 0, canvas.width, canvas.height
+        );
+        return canvas.toDataURL()
+    }
 
     var frameSize = Math.min(width, height);
     var frameWidth = frameSize;
@@ -59,16 +65,6 @@ async function createGif(url) {
     canvas.width = frameWidth;
     canvas.height = frameHeight;
     var context = canvas.getContext('2d', { willReadFrequently: true });
-
-    if (width == height) {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(
-            spriteSheet,
-            0, 0, frameWidth, frameHeight,
-            0, 0, canvas.width, canvas.height
-        );
-        return canvas.toDataURL()
-    }
 
     const framesX = Math.floor(width / frameWidth);
     const framesY = Math.floor(height / frameHeight);
@@ -109,9 +105,16 @@ async function createStickerElement(sticker) {
     const img = document.createElement('img');
     // img.src = sticker.url;
     var url = sticker.url;
-    if (sticker.url.startsWith("http")) {
-        url = await createGif(sticker.url)
+    var spriteUrl = null;
+    if (url.includes("combot.org")) {
+        url = "https://cors.rin2401.workers.dev/" + url
+    } else {
+        spriteUrl = url.replace(
+            "https://zalo-api.zadn.vn/api/emoticon/sticker/webpc",
+            "https://zalo-api.zadn.vn/api/emoticon/sprite",
+        )
     }
+    url = await createGif(url, false)
 
     img.src = url
     img.alt = '';
@@ -121,16 +124,12 @@ async function createStickerElement(sticker) {
     div.onclick = async () => {
         let copied = false;
         try {
-            var blob;
             console.log(sticker.url)
-
-            if (url.includes("data:image/png")) {
-                const response = await fetch(url);
-                blob = await response.blob();
-            } else {
-                const response = await fetch(sticker.url);
-                blob = await response.blob();
+            if (spriteUrl) {
+                img.src = await createGif(spriteUrl, true)
             }
+            const response = await fetch(url);
+            const blob = await response.blob();
             console.log("Blob", blob)
             if (window.ClipboardItem) {
                 console.log("ClipboardItem")
