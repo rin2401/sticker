@@ -84,8 +84,6 @@ async function createGif(url) {
     encoder.setQuality(256)
     encoder.start();
 
-
-
     for (let y = 0; y < framesY; y++) {
         for (let x = 0; x < framesX; x++) {
             context.clearRect(0, 0, canvas.width, canvas.height);
@@ -107,11 +105,17 @@ async function createGif(url) {
 }
 
 
-function createStickerElement(sticker) {
+async function createStickerElement(sticker) {
     const div = document.createElement('div');
     div.className = 'sticker-item';
     const img = document.createElement('img');
-    img.src = sticker.url;
+    // img.src = sticker.url;
+    var url = sticker.url;
+    if (sticker.url.startsWith("http")) {
+        url = await createGif(sticker.url)
+    }
+
+    img.src = url
     img.alt = '';
     img.width = 64;
     img.height = 64;
@@ -121,24 +125,15 @@ function createStickerElement(sticker) {
         try {
             var blob;
             console.log(sticker.url)
-            if (!sticker.url.startsWith("http")) {
-                const response = await fetch(sticker.url);
+
+            if (url.includes("data:image/png")) {
+                const response = await fetch(url);
                 blob = await response.blob();
             } else {
-                var url = await createGif(sticker.url);
-                console.log("Gift url:", url)
-                img.src = url
-                if (url.includes("data:image/png")) {
-                    const response = await fetch(url);
-                    blob = await response.blob();
-                } else {
-                    const response = await fetch(sticker.url);
-                    blob = await response.blob();
-                }
+                const response = await fetch(sticker.url);
+                blob = await response.blob();
             }
-
             console.log("Blob", blob)
-
             if (window.ClipboardItem) {
                 console.log("ClipboardItem")
                 const item = new ClipboardItem({ [blob.type]: blob });
@@ -176,8 +171,8 @@ function showStickerList(pack, packs) {
     backBtn.className = 'back-btn';
     backBtn.onclick = () => showPackList(packs);
     stickerList.appendChild(backBtn);
-    pack.stickers.forEach(sticker => {
-        stickerList.appendChild(createStickerElement(sticker));
+    pack.stickers.forEach(async (sticker) => {
+        stickerList.appendChild(await createStickerElement(sticker));
     });
 }
 
