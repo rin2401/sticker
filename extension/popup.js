@@ -44,16 +44,14 @@ async function createGif(url) {
             "https://zalo-api.zadn.vn/api/emoticon/sprite",
         )
     }
-
     console.log(url)
 
     const spriteSheet = await loadImage(url);
     const width = spriteSheet.width;
     const height = spriteSheet.height;
-    console.log(width, height, spriteSheet.data)
+    console.log(width, height)
 
-
-    var frameSize = 130;
+    var frameSize = Math.min(width, height);
     var frameWidth = frameSize;
     var frameHeight = frameSize;
 
