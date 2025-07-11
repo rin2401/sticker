@@ -2,7 +2,7 @@
 
 ## Features
 - [x] Sticker bot
-- [x] Web & extention
+- [x] Web & extension
   - [x] Copy sticker (PNG)
   - [x] Create GIF from spritesheet
 - [x] Sticker packs
