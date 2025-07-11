@@ -189,4 +189,23 @@ function showStickerList(pack, packs) {
 document.addEventListener('DOMContentLoaded', async () => {
     const packs = await fetchStickerPacks();
     showPackList(packs);
+
+    const searchInput = document.getElementById('search-bar');
+    const searchBtn = document.getElementById('search-btn');
+
+    function filterPacks() {
+        const query = searchInput.value.trim().toLowerCase();
+        if (!query) {
+            showPackList(packs);
+            return;
+        }
+        const filtered = packs.filter(pack => pack.name && pack.name.toLowerCase().includes(query));
+        showPackList(filtered);
+    }
+
+    searchInput.addEventListener('input', filterPacks);
+    searchBtn.addEventListener('click', filterPacks);
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') filterPacks();
+    });
 });
