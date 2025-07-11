@@ -11,7 +11,7 @@ async function loadJson(url) {
 }
 
 async function fetchStickerPacks() {
-    const paths = ["data/line.json", "data/tele.json", "data/sticker.json", "data/line_stickers.jsonl"]
+    const paths = ["data/tele.json", "data/sticker.json", "data/line_stickers.jsonl"]
     let packs = []
     for (let path of paths) {
         packs = packs.concat(await loadJson(path));
@@ -19,9 +19,63 @@ async function fetchStickerPacks() {
     return packs;
 }
 
+async function getFavoritePacks() {
+    return JSON.parse(localStorage.getItem('favoritePacks') || '[]');
+}
+async function setFavoritePacks(favs) {
+    return localStorage.setItem('favoritePacks', JSON.stringify(favs));
+}
+
 function createPackElement(pack, onClick) {
+    const packId = pack.id;
+
+    const heartPath = `M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z`;
+    const heartFilled = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#e25555" xmlns="http://www.w3.org/2000/svg"><path d="${heartPath}"/></svg>`;
+    const heartOutline = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e25555" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path d="${heartPath}"/></svg>`;
+
     const div = document.createElement('div');
     div.className = 'pack-item';
+    div.style.position = 'relative';
+
+    const heartBtn = document.createElement('button');
+    heartBtn.className = 'favorite-btn';
+    heartBtn.style.position = 'absolute';
+    heartBtn.style.top = '4px';
+    heartBtn.style.right = '4px';
+    heartBtn.style.background = 'transparent';
+    heartBtn.style.border = 'none';
+    heartBtn.style.cursor = 'pointer';
+    heartBtn.style.padding = '0';
+    heartBtn.style.zIndex = '2';
+    heartBtn.innerHTML = heartOutline;
+    div.appendChild(heartBtn);
+
+    (async () => {
+        const favs = await getFavoritePacks();
+        if (favs.includes(packId)) {
+            heartBtn.innerHTML = heartFilled;
+            heartBtn.setAttribute('data-fav', '1');
+        } else {
+            heartBtn.innerHTML = heartOutline;
+            heartBtn.setAttribute('data-fav', '0');
+        }
+    })();
+
+    heartBtn.onclick = async (e) => {
+        e.stopPropagation();
+        let favs = await getFavoritePacks();
+        if (favs.includes(packId)) {
+            favs = favs.filter(id => id !== packId);
+            heartBtn.innerHTML = heartOutline;
+            heartBtn.setAttribute('data-fav', '0');
+        } else {
+            favs.push(packId);
+            heartBtn.innerHTML = heartFilled;
+            heartBtn.setAttribute('data-fav', '1');
+        }
+        await setFavoritePacks(favs);
+    };
+
     const img = document.createElement('img');
     img.src = pack.iconUrl || pack.thumbImg;
     img.alt = pack.name;
@@ -165,9 +219,13 @@ async function createStickerElement(sticker) {
     return div;
 }
 
-function showPackList(packs) {
+async function showPackList(packs) {
     const stickerList = document.getElementById('sticker-list');
     stickerList.innerHTML = '';
+
+    let favs = await getFavoritePacks();
+    packs = packs.sort((a, b) => favs.includes(a.id) ? -1 : 1);
+
     packs.forEach(pack => {
         stickerList.appendChild(createPackElement(pack, packObj => showStickerList(packObj, packs)));
     });
