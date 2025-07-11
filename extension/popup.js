@@ -1,10 +1,20 @@
+async function loadJson(url) {
+    const response = await fetch(url);
+
+    if (url.endsWith(".jsonl")) {
+        const text = await response.text();
+        const lines = text.split('\n').filter(line => line.trim() !== '');
+        return lines.map(line => JSON.parse(line));
+    }
+
+    return await response.json()
+}
+
 async function fetchStickerPacks() {
-    const paths = ["data/line.json", "data/tele.json", "data/sticker.json"]
+    const paths = ["data/line.json", "data/tele.json", "data/sticker.json", "data/line_stickers.jsonl"]
     let packs = []
     for (let path of paths) {
-        let response = await fetch(path);
-        response = await response.json();
-        packs = packs.concat(response);
+        packs = packs.concat(await loadJson(path));
     }
     return packs;
 }

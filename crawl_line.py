@@ -1,8 +1,8 @@
-from re import S
 import cloudscraper
 from bs4 import BeautifulSoup
 import json
 import os
+from tqdm.auto import tqdm
 
 scraper = cloudscraper.create_scraper()
 
@@ -13,7 +13,6 @@ def crawl_sticker(id):
     response = scraper.get(url)
 
     soup = BeautifulSoup(response.text, "html.parser")
-    print(soup.prettify())
 
     thumb = soup.find("div", {"data-widget-id": "MainSticker"}).get("data-preview")
     thumb = json.loads(thumb)
@@ -46,8 +45,6 @@ def crawl_sticker(id):
         "stickers": stickers,
     }
 
-    print(json.dumps(item, indent=4, ensure_ascii=False))
-
     return item
 
 
@@ -57,7 +54,6 @@ def crawl_emoji(id):
     response = scraper.get(url)
 
     soup = BeautifulSoup(response.text, "html.parser")
-    print(soup.prettify())
 
     thumb = soup.find("div", {"data-widget-id": "MainSticon"}).get("data-preview")
     thumb = json.loads(thumb)
@@ -66,7 +62,6 @@ def crawl_emoji(id):
     author = soup.find("a", {"data-test": "emoji-author"}).text.strip()
 
     div = soup.find("div", {"data-widget-id": "StickerPreview"})
-    print(div.prettify())
 
     spans = div.select('li[class*="FnStickerPreviewItem"]')
     stickers = []
@@ -91,12 +86,48 @@ def crawl_emoji(id):
         "stickers": stickers,
     }
 
-    print(json.dumps(item, indent=4, ensure_ascii=False))
-
     return item
 
 
-if __name__ == "__main__":
+def crawl_shop(page=1):
+    OUT = "extension/data/line_stickers.jsonl"
+    ids = set()
+    items = []
+    if os.path.exists(OUT):
+        with open(OUT, "r") as f:
+            items = [json.loads(line) for line in f]
+            ids = set([x["id"] for x in items])
+
+    for page in tqdm(range(1, 36)):
+        url = f"https://store.line.me/stickershop/showcase/top/en?page={page}"
+        response = scraper.get(url)
+
+        soup = BeautifulSoup(response.text, "html.parser")
+        ul = soup.find("ul", class_="mdCMN02Ul")
+        spans = ul.select("a")
+
+        for span in tqdm(spans, desc=f"Page {page}"):
+            pack_url = span.get("href")
+            # img = span.find("img")
+            # thumb = img.get("src")
+            # name = img.get("alt")
+            id = pack_url.split("/")[-2]
+
+            print(id, pack_url)
+            if id in ids:
+                continue
+
+            item = crawl_sticker(id)
+            ids.add(id)
+
+            items.append(item)
+            with open(OUT, "a") as f:
+                f.write(json.dumps(item, ensure_ascii=False) + "\n")
+
+    return items
+
+
+def crawl_single(id):
     OUT = "extension/data/line.json"
     items = []
     ids = set()
@@ -106,12 +137,6 @@ if __name__ == "__main__":
             items = json.load(f)
             ids = set([x["id"] for x in items])
 
-    id = "35621"
-    id = "32228"
-    id = "618c9548801cfd4492efadcb"
-    id = "27642"
-    id = "17993"
-    id = "875"
     if id in ids:
         print("Exist pack id")
         exit()
@@ -125,3 +150,15 @@ if __name__ == "__main__":
 
     with open(OUT, "w") as f:
         f.write(json.dumps(items, indent=4, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    id = "35621"
+    id = "32228"
+    id = "618c9548801cfd4492efadcb"
+    id = "27642"
+    id = "17993"
+    id = "875"
+    id = "835"
+    # crawl_single(id)
+    crawl_shop()
