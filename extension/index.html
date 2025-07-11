@@ -8,16 +8,57 @@
     <title>Sticker</title>
     <link rel="stylesheet" href="popup.css">
 
+    <style>
+        .search-bar-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 0;
+            background: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        #search-bar {
+            width: 60%;
+            max-width: 300px;
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 4px;
+            font-size: 1rem;
+            transition: width 0.2s;
+        }
+
+        #search-btn {
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        #search-btn img {
+            width: 30px;
+            height: 30px;
+        }
+
+        @media (max-width: 768px) {
+            #search-bar {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <div
-        style="width: 100%; display: flex; justify-content: center; align-items: center; padding: 10px 0; background: #f9f9f9; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
-        <input id="search-bar" type="text" placeholder="Search stickers..."
-            style="width: 60%; max-width: 300px; padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; margin-right: 4px;">
-        <button id="search-btn"
-            style="background: transparent; border: none; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-            <img src="icon128.png" alt="Search" style="width: 30px; height: 30px;">
+    <div class="search-bar-container">
+        <input id="search-bar" type="text" placeholder="Search stickers...">
+        <button id="search-btn">
+            <img src="icon128.png" alt="Search">
         </button>
     </div>
     <div id="sticker-list"></div>
