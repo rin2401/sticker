@@ -89,8 +89,11 @@ def crawl_emoji(id):
     return item
 
 
-def crawl_shop(page=1):
-    OUT = "extension/data/line_stickers.jsonl"
+def crawl_shop(creator=False, num_page=35):
+    if creator:
+        OUT = "extension/data/line_creator_stickers.jsonl"
+    else:
+        OUT = "extension/data/line_stickers.jsonl"
     ids = set()
     items = []
     if os.path.exists(OUT):
@@ -98,8 +101,11 @@ def crawl_shop(page=1):
             items = [json.loads(line) for line in f]
             ids = set([x["id"] for x in items])
 
-    for page in tqdm(range(1, 36)):
-        url = f"https://store.line.me/stickershop/showcase/top/en?page={page}"
+    for page in tqdm(range(1, num_page + 1)):
+        if creator:
+            url = f"https://store.line.me/stickershop/showcase/top_creators/en?page={page}"
+        else:
+            url = f"https://store.line.me/stickershop/showcase/top/en?page={page}"
         response = scraper.get(url)
 
         soup = BeautifulSoup(response.text, "html.parser")
@@ -113,7 +119,6 @@ def crawl_shop(page=1):
             # name = img.get("alt")
             id = pack_url.split("/")[-2]
 
-            print(id, pack_url)
             if id in ids:
                 continue
 
@@ -161,4 +166,5 @@ if __name__ == "__main__":
     id = "875"
     id = "835"
     # crawl_single(id)
-    crawl_shop()
+    # crawl_shop(False, 35)
+    crawl_shop(True, 139)
