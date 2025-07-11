@@ -26,18 +26,18 @@ async function setFavoritePacks(favs) {
     return localStorage.setItem('favoritePacks', JSON.stringify(favs));
 }
 
+
+const heartPath = `M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z`;
+const heartFilled = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#e25555" xmlns="http://www.w3.org/2000/svg"><path d="${heartPath}"/></svg>`;
+const heartOutline = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e25555" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path d="${heartPath}"/></svg>`;
+
 function createPackElement(pack, onClick) {
-    const packId = pack.id;
-
-    const heartPath = `M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z`;
-    const heartFilled = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#e25555" xmlns="http://www.w3.org/2000/svg"><path d="${heartPath}"/></svg>`;
-    const heartOutline = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e25555" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path d="${heartPath}"/></svg>`;
-
-    const div = document.createElement('div');
+    let packId = pack.id;
+    let div = document.createElement('div');
     div.className = 'pack-item';
     div.style.position = 'relative';
 
-    const heartBtn = document.createElement('button');
+    let heartBtn = document.createElement('button');
     heartBtn.className = 'favorite-btn';
     heartBtn.style.position = 'absolute';
     heartBtn.style.top = '4px';
@@ -76,13 +76,13 @@ function createPackElement(pack, onClick) {
         await setFavoritePacks(favs);
     };
 
-    const img = document.createElement('img');
+    let img = document.createElement('img');
     img.src = pack.iconUrl || pack.thumbImg;
     img.alt = pack.name;
     img.title = pack.name;
     img.width = 64;
     img.height = 64;
-    const name = document.createElement('div');
+    let name = document.createElement('div');
     name.className = 'pack-name';
     name.textContent = pack.name;
     div.appendChild(img);
@@ -103,13 +103,9 @@ function loadImage(src) {
 }
 
 async function createGif(url, is_gif = false) {
-    console.log(url)
-
     const spriteSheet = await loadImage(url);
     const width = spriteSheet.width;
     const height = spriteSheet.height;
-    console.log(width, height)
-
     if (!is_gif) {
         const canvas = document.createElement('canvas');
         canvas.width = width;
@@ -124,21 +120,19 @@ async function createGif(url, is_gif = false) {
         return canvas.toDataURL()
     }
 
-    var frameSize = Math.min(width, height);
-    var frameWidth = frameSize;
-    var frameHeight = frameSize;
+    let frameSize = Math.min(width, height);
+    let frameWidth = frameSize;
+    let frameHeight = frameSize;
 
     const canvas = document.createElement('canvas');
     canvas.width = frameWidth;
     canvas.height = frameHeight;
-    var context = canvas.getContext('2d', { willReadFrequently: true });
+    let context = canvas.getContext('2d', { willReadFrequently: true });
 
-    const framesX = Math.floor(width / frameWidth);
-    const framesY = Math.floor(height / frameHeight);
+    let framesX = Math.floor(width / frameWidth);
+    let framesY = Math.floor(height / frameHeight);
 
-    console.log(framesX, framesY, frameWidth, frameHeight)
-
-    var encoder = new GIFEncoder();
+    let encoder = new GIFEncoder();
     encoder.setRepeat(0);
     encoder.setDelay(100);
     encoder.setTransparent(0x000000);
@@ -153,16 +147,13 @@ async function createGif(url, is_gif = false) {
                 x * frameWidth, y * frameHeight, frameWidth, frameHeight,
                 0, 0, canvas.width, canvas.height
             );
-
-            console.log("Frame", x, y)
-
             encoder.addFrame(context);
         }
     }
 
     encoder.finish();
     var buffer = encoder.stream().getData();
-    return 'data:image/gif;base64,' + encode64(buffer);
+    return 'data:image/gif;base64,' + btoa(buffer);
 }
 
 
