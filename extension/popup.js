@@ -164,14 +164,22 @@ async function createStickerElement(sticker) {
     // img.src = sticker.url;
     var url = sticker.url;
     var spriteUrl = null;
+    var animationUrl = null;
+
     if (url.includes("combot.org")) {
         url = "https://cors.rin2401.workers.dev/" + url
-    } else {
+    } else if (url.includes("zalo-api.zadn.vn")) {
         spriteUrl = url.replace(
             "https://zalo-api.zadn.vn/api/emoticon/sticker/webpc",
             "https://zalo-api.zadn.vn/api/emoticon/sprite",
         )
+    } else if (url.includes("line-scdn.net") && url.includes("sticker@")) {
+        animationUrl = url.replace(
+            "sticker@",
+            "sticker_animation@",
+        )
     }
+
     url = await createGif(url, false)
 
     img.src = url
@@ -185,6 +193,15 @@ async function createStickerElement(sticker) {
             console.log(sticker.url)
             if (spriteUrl) {
                 img.src = await createGif(spriteUrl, true)
+            } else if (animationUrl) {
+                const response = await fetch(animationUrl);
+                const buffer = await response.arrayBuffer()
+                const bytes = new Uint8Array(buffer);
+                let binary = '';
+                bytes.forEach(byte => binary += String.fromCharCode(byte));
+                const base64 = btoa(binary);
+
+                img.src = 'data:image/gif;base64,' + base64;
             }
             const response = await fetch(url);
             const blob = await response.blob();
