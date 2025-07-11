@@ -102,23 +102,24 @@ function loadImage(src) {
     });
 }
 
-async function createGif(url, is_gif = false) {
+async function createImgBase64(url, is_gif = false) {
+    const response = await fetch(url);
+    const buffer = await response.arrayBuffer()
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    bytes.forEach(byte => binary += String.fromCharCode(byte));
+    const base64 = btoa(binary);
+
+    if (is_gif) {
+        return 'data:image/gif;base64,' + base64;
+    }
+    return 'data:image/png;base64,' + base64;
+}
+
+async function createGifBase64(url) {
     const spriteSheet = await loadImage(url);
     const width = spriteSheet.width;
     const height = spriteSheet.height;
-    if (!is_gif) {
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const context = canvas.getContext('2d', { willReadFrequently: true });
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(
-            spriteSheet,
-            0, 0, width, height,
-            0, 0, canvas.width, canvas.height
-        );
-        return canvas.toDataURL()
-    }
 
     let frameSize = Math.min(width, height);
     let frameWidth = frameSize;
@@ -173,6 +174,7 @@ async function createStickerElement(sticker) {
             "https://zalo-api.zadn.vn/api/emoticon/sticker/webpc",
             "https://zalo-api.zadn.vn/api/emoticon/sprite",
         )
+        url = url.replace("size=130", "size=240")
     } else if (url.includes("line-scdn.net") && url.includes("sticker@")) {
         animationUrl = url.replace(
             "sticker@",
@@ -180,9 +182,9 @@ async function createStickerElement(sticker) {
         )
     }
 
-    url = await createGif(url, false)
+    base64_url = await createImgBase64(url)
 
-    img.src = url
+    img.src = base64_url
     img.alt = '';
     img.width = 64;
     img.height = 64;
@@ -190,20 +192,15 @@ async function createStickerElement(sticker) {
     div.onclick = async () => {
         let copied = false;
         try {
-            console.log(sticker.url)
+            console.log(url)
             if (spriteUrl) {
-                img.src = await createGif(spriteUrl, true)
+                console.log("Sprite URL:", spriteUrl)
+                img.src = await createGifBase64(spriteUrl)
             } else if (animationUrl) {
-                const response = await fetch(animationUrl);
-                const buffer = await response.arrayBuffer()
-                const bytes = new Uint8Array(buffer);
-                let binary = '';
-                bytes.forEach(byte => binary += String.fromCharCode(byte));
-                const base64 = btoa(binary);
-
-                img.src = 'data:image/gif;base64,' + base64;
+                console.log("Animation URL:", animationUrl)
+                img.src = await createImgBase64(animationUrl, true)
             }
-            const response = await fetch(url);
+            const response = await fetch(base64_url);
             const blob = await response.blob();
             console.log("Blob", blob)
             if (window.ClipboardItem) {
