@@ -163,6 +163,11 @@ async function createStickerElement(sticker) {
     div.className = 'sticker-item';
     const img = document.createElement('img');
     // img.src = sticker.url;
+    img.alt = '';
+    img.width = 64;
+    img.height = 64;
+    div.appendChild(img);
+
     var url = sticker.url;
     var spriteUrl = null;
     var animationUrl = null;
@@ -185,10 +190,6 @@ async function createStickerElement(sticker) {
     base64_url = await createImgBase64(url)
 
     img.src = base64_url
-    img.alt = '';
-    img.width = 64;
-    img.height = 64;
-    div.appendChild(img);
     div.onclick = async () => {
         let copied = false;
         try {
@@ -239,9 +240,14 @@ async function showPackList(packs) {
 function showStickerList(pack, packs) {
     const stickerList = document.getElementById('sticker-list');
     stickerList.innerHTML = '';
-    const backBtn = document.createElement('button');
-    backBtn.textContent = '← Quay lại';
-    backBtn.className = 'back-btn';
+    const backBtn = document.createElement('div');
+    backBtn.className = 'back-btn sticker-item copied';
+    const img = document.createElement('img');
+    img.alt = 'Quay lại';
+    img.width = 64;
+    img.height = 64;
+    img.src = "back.png"
+    backBtn.appendChild(img);
     backBtn.onclick = () => showPackList(packs);
     stickerList.appendChild(backBtn);
     pack.stickers.forEach(async (sticker) => {
