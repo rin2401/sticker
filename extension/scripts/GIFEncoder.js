@@ -47,6 +47,7 @@ GIFEncoder = function () {
 	var out;
 	var image; // current frame
 	var pixels; // BGR byte array from frame
+	var pixel_a;
 	var indexedPixels; // converted frame indexed to palette
 	var colorDepth; // number of bit planes
 	var colorTab; // RGB palette
@@ -244,6 +245,7 @@ GIFEncoder = function () {
 		transIndex = 0;
 		image = null;
 		pixels = null;
+		pixel_a = null;
 		indexedPixels = null;
 		colorTab = null;
 		closeStream = false;
@@ -350,14 +352,29 @@ GIFEncoder = function () {
 			indexedPixels[j] = index;
 		}
 
+		for (let i = 0; i < colorTab.length; i++) {
+			if (!usedEntry[i]) {
+				transIndex = i;
+				break;
+			}
+		}
+		usedEntry[transIndex] = true;
+
+		for (let j = 0; j < nPix; j++) {
+			if (pixel_a[j] < 200) {
+				indexedPixels[j] = transIndex;
+			}
+		}
+
 		pixels = null;
+		pixel_a = null;
 		colorDepth = 8;
 		palSize = 7;
 
 		// get closest match to transparent color if specified
-		if (transparent !== null) {
-			transIndex = findClosest(transparent);
-		}
+		// if (transparent !== null) {
+		// 	transIndex = findClosest(transparent);
+		// } 
 	};
 
 	/**
@@ -397,18 +414,18 @@ GIFEncoder = function () {
 		var w = width;
 		var h = height;
 		pixels = [];
+		pixel_a = [];
 		var data = image;
 		var count = 0;
 
-		for (var i = 0; i < h; i++) {
+		for (let i = 0; i < h; i++) {
 
-			for (var j = 0; j < w; j++) {
-
+			for (let j = 0; j < w; j++) {
 				var b = (i * w * 4) + j * 4;
 				pixels[count++] = data[b];
 				pixels[count++] = data[b + 1];
 				pixels[count++] = data[b + 2];
-
+				pixel_a[count / 3] = data[b + 3];
 			}
 
 		}

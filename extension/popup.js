@@ -137,7 +137,7 @@ async function createGifBase64(url) {
     encoder.setRepeat(0);
     encoder.setDelay(100);
     encoder.setTransparent(0x000000);
-    encoder.setQuality(256)
+    encoder.setQuality(10)
     encoder.start();
 
     for (let y = 0; y < framesY; y++) {
