@@ -187,7 +187,7 @@ async function createStickerElement(sticker) {
         )
     }
 
-    base64_url = await createImgBase64(url)
+    let base64_url = await createImgBase64(url)
 
     img.src = base64_url
     div.onclick = async () => {
